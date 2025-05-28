@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ artist_data.artist_name }} - Wrapped {{ year }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1A1A1A 0%, #333333 100%);
+            color: white;
+            line-height: 1.6;
+        }
+        
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+            color: #1A1A1A;
+            page-break-after: always;
+        }
+        
+        .page:last-child {
+            page-break-after: avoid;
+        }
+        
+        .cover-page {
+            background: linear-gradient(135deg, #1A1A1A 0%, #E50914 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+        
+        .artist-name {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .year-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #E50914;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .content-page {
+            background: white;
+            color: #1A1A1A;
+        }
+        
+        .page-header {
+            margin-bottom: 40px;
+            border-bottom: 3px solid #E50914;
+            padding-bottom: 20px;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1A1A1A;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .highlight-number {
+            font-size: 64px;
+            font-weight: 800;
+            color: #E50914;
+            text-align: center;
+            margin: 40px 0;
+            line-height: 1;
+        }
+        
+        .tracks-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .track-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #E50914;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .track-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .track-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .track-stats {
+            text-align: right;
+        }
+        
+        .track-streams {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E50914;
+        }
+        
+        .track-countries {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .platform-bars {
+            margin-top: 20px;
+        }
+        
+        .platform-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .platform-name {
+            width: 120px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .platform-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 0 15px;
+            position: relative;
+        }
+        
+        .platform-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #E50914, #ff4757);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .platform-percentage {
+            font-weight: 600;
+            font-size: 14px;
+            color: #E50914;
+            min-width: 50px;
+        }
+        
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .country-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .country-name {
+            font-weight: 600;
+        }
+        
+        .country-streams {
+            color: #E50914;
+            font-weight: 600;
+        }
+        
+        .insights-box {
+            background: linear-gradient(135deg, #E50914, #ff4757);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .insights-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .insights-text {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <div class="page cover-page">
+        <div class="logo">PRISM ANALYTICS</div>
+        
+        <h1 class="artist-name">{{ artist_data.artist_name }}</h1>
+        
+        <div class="year-badge">{{ year }} WRAPPED</div>
+        
+        <div class="summary-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ artist_data.total_streams_formatted }}</span>
+                <div class="stat-label">Total Streams</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ artist_data.unique_countries }}</span>
+                <div class="stat-label">Countries</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ artist_data.summary.total_tracks }}</span>
+                <div class="stat-label">Tracks</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ artist_data.summary.best_month }}</span>
+                <div class="stat-label">Peak Month</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Streams Page -->
+    <div class="page content-page">
+        <div class="page-header">
+            <h2 class="page-title">Your {{ year }} in Numbers</h2>
+            <p class="page-subtitle">A year of incredible music moments</p>
+        </div>
+        
+        <div class="highlight-number">{{ artist_data.total_streams_formatted }}</div>
+        
+        <div class="insights-box">
+            <h3 class="insights-title">🎵 Streaming Milestone</h3>
+            <p class="insights-text">
+                Your music was streamed {{ artist_data.total_streams_formatted }} times in {{ year }}! 
+                That's enough listening to power {{ (artist_data.total_streams / 1000000) | round(1) }} million moments of joy.
+            </p>
+        </div>
+        
+        {% if artist_data.peak_month %}
+        <div class="chart-container">
+            <h3 style="margin-bottom: 20px; font-size: 20px;">Peak Performance</h3>
+            <p>Your biggest month was <strong>{{ artist_data.peak_month.month_name }}</strong> with 
+            {{ (artist_data.peak_month.streams / 1000000) | round(1) }}M streams!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Top Tracks Page -->
+    <div class="page content-page">
+        <div class="page-header">
+            <h2 class="page-title">Your Top Tracks</h2>
+            <p class="page-subtitle">The songs that defined your {{ year }}</p>
+        </div>
+        
+        <div class="tracks-grid">
+            {% for track in artist_data.top_tracks[:5] %}
+            <div class="track-item">
+                <div class="track-info">
+                    <h3>{{ track.track_name or 'Unknown Track' }}</h3>
+                    <p>{{ track.album_name or 'Single' }}</p>
+                </div>
+                <div class="track-stats">
+                    <div class="track-streams">
+                        {% if track.streams >= 1000000 %}
+                            {{ (track.streams / 1000000) | round(1) }}M
+                        {% elif track.streams >= 1000 %}
+                            {{ (track.streams / 1000) | round(1) }}K
+                        {% else %}
+                            {{ track.streams }}
+                        {% endif %}
+                    </div>
+                    <div class="track-countries">{{ track.countries or 0 }} countries</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="insights-box">
+            <h3 class="insights-title">🎯 Track Champion</h3>
+            <p class="insights-text">
+                "{{ artist_data.top_tracks[0].track_name or 'Your top track' }}" was your biggest hit, 
+                reaching listeners in {{ artist_data.top_tracks[0].countries or 0 }} countries!
+            </p>
+        </div>
+    </div>
+
+    <!-- Platform Analysis Page -->
+    <div class="page content-page">
+        <div class="page-header">
+            <h2 class="page-title">Platform Performance</h2>
+            <p class="page-subtitle">Where your music made the biggest impact</p>
+        </div>
+        
+        <div class="chart-container">
+            <h3 style="margin-bottom: 20px; font-size: 20px;">Streaming Platforms</h3>
+            <div class="platform-bars">
+                {% for platform in artist_data.platform_data %}
+                <div class="platform-item">
+                    <div class="platform-name">{{ platform.platform_name }}</div>
+                    <div class="platform-bar">
+                        <div class="platform-fill" style="width: {{ platform.percentage }}%"></div>
+                    </div>
+                    <div class="platform-percentage">{{ platform.percentage }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if artist_data.top_platform %}
+        <div class="insights-box">
+            <h3 class="insights-title">🏆 Platform Champion</h3>
+            <p class="insights-text">
+                {{ artist_data.top_platform.platform_name }} was your top platform, 
+                accounting for {{ artist_data.top_platform.percentage }}% of your total streams!
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Geographic Reach Page -->
+    <div class="page content-page">
+        <div class="page-header">
+            <h2 class="page-title">Global Reach</h2>
+            <p class="page-subtitle">Your music traveled the world</p>
+        </div>
+        
+        <div class="highlight-number">{{ artist_data.unique_countries }}</div>
+        
+        <div style="text-align: center; margin: 20px 0; font-size: 18px; color: #666;">
+            Countries reached with your music
+        </div>
+        
+        <div class="country-grid">
+            {% for country in artist_data.country_data[:10] %}
+            <div class="country-item">
+                <div class="country-name">{{ country.country }}</div>
+                <div class="country-streams">
+                    {% if country.streams >= 1000000 %}
+                        {{ (country.streams / 1000000) | round(1) }}M
+                    {% elif country.streams >= 1000 %}
+                        {{ (country.streams / 1000) | round(1) }}K  
+                    {% else %}
+                        {{ country.streams }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="insights-box">
+            <h3 class="insights-title">🌍 Global Impact</h3>
+            <p class="insights-text">
+                Your music crossed borders and reached {{ artist_data.unique_countries }} countries! 
+                Music truly is a universal language.
+            </p>
+        </div>
+    </div>
+
+    <!-- Thank You Page -->
+    <div class="page content-page">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;">
+            <h1 style="font-size: 48px; font-weight: 800; color: #E50914; margin-bottom: 30px;">
+                Thank You
+            </h1>
+            
+            <p style="font-size: 20px; color: #666; margin-bottom: 40px; max-width: 600px;">
+                {{ year }} was an incredible year for your music. Thank you for sharing your art with the world 
+                and creating moments that matter.
+            </p>
+            
+            <div style="background: linear-gradient(135deg, #1A1A1A, #333333); color: white; padding: 30px; border-radius: 12px; max-width: 500px;">
+                <h3 style="font-size: 24px; margin-bottom: 15px;">Keep Creating</h3>
+                <p>Here's to another year of incredible music and even more streaming milestones!</p>
+            </div>
+            
+            <div style="margin-top: 40px; font-size: 14px; color: #999;">
+                Generated by Prism Analytics • {{ generated_date }}
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>© {{ year }} Prism Analytics • Music Data Intelligence Platform</div>
+    </div>
+</body>
+</html>

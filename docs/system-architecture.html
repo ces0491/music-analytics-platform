@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>system-architecture</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="system-architecture_files/libs/clipboard/clipboard.min.js"></script>
+<script src="system-architecture_files/libs/quarto-html/quarto.js"></script>
+<script src="system-architecture_files/libs/quarto-html/popper.min.js"></script>
+<script src="system-architecture_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="system-architecture_files/libs/quarto-html/anchor.min.js"></script>
+<link href="system-architecture_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="system-architecture_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="system-architecture_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="system-architecture_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="system-architecture_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+<section id="music-analytics-platform---system-architecture" class="level1">
+<h1>🏗️ Music Analytics Platform - System Architecture</h1>
+<section id="complete-system-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="complete-system-architecture">📊 Complete System Architecture</h2>
+<pre class="mermaid"><code>graph TB
+    subgraph "External Data Sources"
+        A1[Spotify Data Files]
+        A2[Apple Music Files]
+        A3[YouTube Analytics]
+        A4[Social Media APIs]
+        A5[Metadata Files]
+    end
+    
+    subgraph "Data Ingestion Layer"
+        B1[File Handler Service]
+        B2[Platform Mapper]
+        B3[Data Validator]
+        B4[Data Processor Service]
+    end
+    
+    subgraph "Data Storage Layer"
+        C1[(SQLite Database)]
+        C2[File System Storage]
+        C3[Generated Reports]
+    end
+    
+    subgraph "API Layer"
+        D1[Authentication Service]
+        D2[Dashboard API]
+        D3[Analytics API]
+        D4[Report Generator API]
+        D5[Artist API]
+    end
+    
+    subgraph "Frontend Layer"
+        E1[React Dashboard]
+        E2[Analytics Views]
+        E3[Report Builder]
+        E4[Artist Portal]
+    end
+    
+    subgraph "Report Generation"
+        F1[HTML Templates]
+        F2[PDF Generator]
+        F3[Email Service]
+    end
+    
+    subgraph "Deployment"
+        G1[Docker Backend]
+        G2[Docker Frontend]
+        G3[Nginx Proxy]
+    end
+    
+    A1 --&gt; B1
+    A2 --&gt; B1
+    A3 --&gt; B1
+    A4 --&gt; B1
+    A5 --&gt; B1
+    
+    B1 --&gt; B2
+    B2 --&gt; B3
+    B3 --&gt; B4
+    
+    B4 --&gt; C1
+    B4 --&gt; C2
+    
+    C1 --&gt; D2
+    C1 --&gt; D3
+    C1 --&gt; D4
+    C1 --&gt; D5
+    
+    D1 --&gt; D2
+    D1 --&gt; D3
+    D1 --&gt; D4
+    D1 --&gt; D5
+    
+    D2 --&gt; E1
+    D3 --&gt; E2
+    D4 --&gt; E3
+    D5 --&gt; E4
+    
+    D4 --&gt; F1
+    F1 --&gt; F2
+    F2 --&gt; F3
+    F2 --&gt; C3
+    
+    E1 --&gt; G2
+    D2 --&gt; G1
+    G1 --&gt; G3
+    G2 --&gt; G3</code></pre>
+</section>
+<section id="data-processing-flow" class="level2">
+<h2 class="anchored" data-anchor-id="data-processing-flow">🔄 Data Processing Flow</h2>
+<pre class="mermaid"><code>flowchart TD
+    A[Raw Music Data Upload] --&gt; B{File Type Detection}
+    
+    B --&gt;|CSV/Excel| C[Read File with Pandas]
+    B --&gt;|Unknown Format| D[Format Error]
+    
+    C --&gt; E{Platform Detection}
+    
+    E --&gt;|Spotify| F[Spotify Data Processor]
+    E --&gt;|Apple Music| G[Apple Music Processor]
+    E --&gt;|YouTube| H[YouTube Data Processor]
+    E --&gt;|Metadata| I[Metadata Processor]
+    E --&gt;|Unknown| J[Generic Processor]
+    
+    F --&gt; K[Data Validation &amp; Cleaning]
+    G --&gt; K
+    H --&gt; K
+    I --&gt; K
+    J --&gt; K
+    
+    K --&gt; L{Data Quality Check}
+    L --&gt;|Pass| M[Database Schema Mapping]
+    L --&gt;|Fail| N[Validation Error Log]
+    
+    M --&gt; O[Insert to Database]
+    O --&gt; P[Update Processing Stats]
+    P --&gt; Q[Success Response]
+    
+    N --&gt; R[Error Response]
+    D --&gt; R</code></pre>
+</section>
+<section id="report-generation-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="report-generation-workflow">📈 Report Generation Workflow</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    participant U as User/Frontend
+    participant API as Report API
+    participant DB as Database
+    participant T as Template Engine
+    participant PDF as PDF Generator
+    participant E as Email Service
+    
+    U-&gt;&gt;API: Request Wrapped Report
+    Note over U,API: POST /reports/generate/wrapped
+    
+    API-&gt;&gt;DB: Query Artist Data
+    DB--&gt;&gt;API: Return Aggregated Data
+    
+    API-&gt;&gt;API: Calculate Insights &amp; Metrics
+    
+    API-&gt;&gt;T: Render HTML Template
+    T--&gt;&gt;API: Generated HTML
+    
+    API-&gt;&gt;PDF: Convert HTML to PDF
+    PDF--&gt;&gt;API: PDF File Path
+    
+    alt Email Requested
+        API-&gt;&gt;E: Send Email with PDF
+        E--&gt;&gt;API: Email Sent Confirmation
+    end
+    
+    API--&gt;&gt;U: Return Report Details
+    Note over U,API: {pdf_path, artist_name, summary}</code></pre>
+</section>
+<section id="frontend-component-flow" class="level2">
+<h2 class="anchored" data-anchor-id="frontend-component-flow">🎯 Frontend Component Flow</h2>
+<pre class="mermaid"><code>graph TD
+    A[App.jsx - Main Router] --&gt; B[Header Component]
+    A --&gt; C[Sidebar Component]
+    A --&gt; D[Main Content Area]
+    
+    D --&gt; E{Current Route}
+    
+    E --&gt;|/dashboard| F[Dashboard Overview]
+    E --&gt;|/analytics| G[Platform Analysis]
+    E --&gt;|/reports| H[Report Builder]
+    E --&gt;|/artists| I[Artist Directory]
+    
+    F --&gt; F1[useApi Hook]
+    F --&gt; F2[Metrics Cards]
+    F --&gt; F3[Trending Artists]
+    F --&gt; F4[Charts &amp; Visualizations]
+    
+    G --&gt; G1[Platform Performance Table]
+    G --&gt; G2[Market Share Charts]
+    G --&gt; G3[Platform Comparison]
+    
+    H --&gt; H1[Artist Selection]
+    H --&gt; H2[Report Type Selection]
+    H --&gt; H3[Generate Report Button]
+    H --&gt; H4[Report Preview]
+    
+    I --&gt; I1[Artist Search]
+    I --&gt; I2[Artist Cards]
+    I --&gt; I3[Artist Profile Links]
+    
+    F1 --&gt; API[Backend API Calls]
+    G1 --&gt; API
+    H3 --&gt; API
+    I1 --&gt; API</code></pre>
+</section>
+<section id="backend-service-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="backend-service-architecture">🔧 Backend Service Architecture</h2>
+<pre class="mermaid"><code>graph LR
+    subgraph "Flask Application Factory"
+        A[app.py - Main App]
+    end
+    
+    subgraph "Service Layer"
+        B[Data Processor Service]
+        C[API Service]
+        D[Report Generator Service]
+        E[Email Service]
+        F[Auth Service]
+    end
+    
+    subgraph "Model Layer"
+        G[Database Models]
+        H[Artist Model]
+        I[Track Model]
+        J[Metrics Model]
+    end
+    
+    subgraph "Utility Layer"
+        K[File Handlers]
+        L[Data Validators]
+        M[Platform Mappers]
+        N[Config Manager]
+    end
+    
+    A --&gt; B
+    A --&gt; C
+    A --&gt; D
+    A --&gt; E
+    A --&gt; F
+    
+    B --&gt; G
+    C --&gt; G
+    D --&gt; G
+    
+    B --&gt; K
+    B --&gt; L
+    B --&gt; M
+    
+    C --&gt; H
+    C --&gt; I
+    C --&gt; J
+    
+    D --&gt; E</code></pre>
+</section>
+<section id="database-schema-relationships" class="level2">
+<h2 class="anchored" data-anchor-id="database-schema-relationships">💾 Database Schema Relationships</h2>
+<pre class="mermaid"><code>erDiagram
+    dim_artists {
+        string artist_id PK
+        string artist_name
+        string artist_name_normalized
+        string source_platform
+        datetime created_at
+        boolean is_auto_generated
+    }
+    
+    dim_tracks {
+        string isrc PK
+        string track_name
+        string artist_id FK
+        string album_name
+        string label
+        integer duration_seconds
+        date release_date
+        string genre
+        datetime created_at
+    }
+    
+    dim_platforms {
+        string platform_id PK
+        string platform_name
+        string platform_category
+        string metric_type
+    }
+    
+    dim_countries {
+        string country_code PK
+        string country_name
+        string country_region
+    }
+    
+    dim_dates {
+        integer date_id PK
+        date full_date
+        integer year
+        integer month
+        string month_name
+        integer quarter
+    }
+    
+    fact_music_metrics {
+        integer metric_id PK
+        string isrc FK
+        string platform_id FK
+        string country_code FK
+        integer date_id FK
+        real metric_value
+        string metric_type
+        string product_type
+        string source_file
+        datetime processing_date
+        string environment
+    }
+    
+    processing_history {
+        integer processing_id PK
+        string file_path
+        string file_name
+        string platform_id
+        datetime processing_date
+        integer records_processed
+        integer records_inserted
+        integer file_size_bytes
+        string file_checksum
+        string processing_status
+        string error_message
+        real processing_duration_seconds
+    }
+    
+    apple_identifier_mapping {
+        string apple_identifier PK
+        string isrc
+        string track_name
+        string artist_name
+        real confidence_score
+        datetime created_at
+    }
+    
+    dim_artists ||--o{ dim_tracks : "has"
+    dim_tracks ||--o{ fact_music_metrics : "generates"
+    dim_platforms ||--o{ fact_music_metrics : "measures"
+    dim_countries ||--o{ fact_music_metrics : "located_in"
+    dim_dates ||--o{ fact_music_metrics : "occurs_on"</code></pre>
+</section>
+<section id="frontend-component-hierarchy" class="level2">
+<h2 class="anchored" data-anchor-id="frontend-component-hierarchy">🎨 Frontend Component Hierarchy</h2>
+<pre class="mermaid"><code>graph TD
+    A[App] --&gt; B[Header]
+    A --&gt; C[Sidebar]
+    A --&gt; D[Main Content]
+    
+    B --&gt; B1[Logo]
+    B --&gt; B2[Menu Toggle]
+    B --&gt; B3[User Info]
+    
+    C --&gt; C1[Navigation Items]
+    C --&gt; C2[Active Route Highlighting]
+    
+    D --&gt; E{Route Components}
+    
+    E --&gt; F[DashboardOverview]
+    E --&gt; G[PlatformAnalysis]
+    E --&gt; H[ReportBuilder]
+    E --&gt; I[ArtistDirectory]
+    E --&gt; J[ArtistProfile]
+    
+    F --&gt; F1[MetricsCard x4]
+    F --&gt; F2[TrendingArtists Table]
+    
+    G --&gt; G1[Platform Performance Table]
+    G --&gt; G2[Market Share Chart]
+    
+    H --&gt; H1[Artist Selector]
+    H --&gt; H2[Report Type Selector]
+    H --&gt; H3[Generate Button]
+    H --&gt; H4[Report Preview]
+    
+    I --&gt; I1[Search Bar]
+    I --&gt; I2[Artist Grid]
+    I --&gt; I3[Pagination]
+    
+    J --&gt; J1[Artist Header]
+    J --&gt; J2[Metrics Overview]
+    J --&gt; J3[Track Performance]
+    J --&gt; J4[Platform Breakdown]
+    
+    F1 --&gt; F1A[useApi Hook]
+    F2 --&gt; F2A[useApi Hook]
+    G1 --&gt; G1A[useApi Hook]
+    H3 --&gt; H3A[Report Generation API]</code></pre>
+</section>
+<section id="api-requestresponse-flow" class="level2">
+<h2 class="anchored" data-anchor-id="api-requestresponse-flow">🔄 API Request/Response Flow</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    participant F as Frontend
+    participant A as API Gateway
+    participant S as Service Layer
+    participant D as Database
+    participant C as Cache
+    
+    F-&gt;&gt;A: GET /api/v1/dashboard/overview
+    A-&gt;&gt;A: Check Authentication
+    A-&gt;&gt;C: Check Cache
+    
+    alt Cache Hit
+        C--&gt;&gt;A: Return Cached Data
+        A--&gt;&gt;F: JSON Response
+    else Cache Miss
+        A-&gt;&gt;S: Process Request
+        S-&gt;&gt;D: Execute Queries
+        D--&gt;&gt;S: Return Data
+        S-&gt;&gt;S: Process &amp; Format Data
+        S--&gt;&gt;A: Processed Data
+        A-&gt;&gt;C: Store in Cache
+        A--&gt;&gt;F: JSON Response
+    end
+    
+    Note over F,D: All API calls follow this pattern with caching and authentication</code></pre>
+</section>
+<section id="user-interaction-flows" class="level2">
+<h2 class="anchored" data-anchor-id="user-interaction-flows">📱 User Interaction Flows</h2>
+<section id="dashboard-usage-flow" class="level3">
+<h3 class="anchored" data-anchor-id="dashboard-usage-flow">Dashboard Usage Flow</h3>
+<pre class="mermaid"><code>journey
+    title User Dashboard Experience
+    section Login
+      Open App: 5: User
+      View Dashboard: 5: User
+    section Explore Data
+      View Metrics Cards: 4: User
+      Check Trending Artists: 5: User
+      Navigate to Analytics: 4: User
+    section Generate Report
+      Go to Report Builder: 5: User
+      Select Artist: 4: User
+      Choose Report Type: 4: User
+      Generate PDF: 5: User
+      Download/Email Report: 5: User</code></pre>
+</section>
+<section id="report-generation-flow" class="level3">
+<h3 class="anchored" data-anchor-id="report-generation-flow">Report Generation Flow</h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; SelectArtist
+    SelectArtist --&gt; SelectReportType
+    SelectReportType --&gt; SetParameters
+    SetParameters --&gt; PreviewData
+    PreviewData --&gt; GenerateReport
+    GenerateReport --&gt; Processing
+    Processing --&gt; ReportReady
+    ReportReady --&gt; EmailReport
+    ReportReady --&gt; DownloadReport
+    EmailReport --&gt; [*]
+    DownloadReport --&gt; [*]
+    
+    Processing --&gt; Error
+    Error --&gt; SelectArtist</code></pre>
+</section>
+</section>
+<section id="deployment-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="deployment-architecture">🚀 Deployment Architecture</h2>
+<pre class="mermaid"><code>graph TB
+    subgraph "Development Environment"
+        D1[Local Development]
+        D2[Hot Reloading]
+        D3[Debug Mode]
+    end
+    
+    subgraph "Docker Containers"
+        C1[Backend Container]
+        C2[Frontend Container]
+        C3[Database Volume]
+        C4[Nginx Proxy]
+    end
+    
+    subgraph "Production Services"
+        P1[Load Balancer]
+        P2[SSL Termination]
+        P3[Monitoring]
+        P4[Log Aggregation]
+    end
+    
+    D1 --&gt; C1
+    D1 --&gt; C2
+    
+    C1 --&gt; C3
+    C2 --&gt; C4
+    C1 --&gt; C4
+    
+    C4 --&gt; P1
+    P1 --&gt; P2
+    P2 --&gt; P3
+    P3 --&gt; P4</code></pre>
+</section>
+<section id="function-purpose-summary" class="level2">
+<h2 class="anchored" data-anchor-id="function-purpose-summary">🔍 Function Purpose Summary</h2>
+<section id="backend-services" class="level3">
+<h3 class="anchored" data-anchor-id="backend-services">Backend Services</h3>
+<table class="table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 27%">
+<col style="width: 45%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Service</th>
+<th>Purpose</th>
+<th>Key Functions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Data Processor</strong></td>
+<td>Ingest and clean music data</td>
+<td><code>process_folder()</code>, <code>detect_platform()</code>, <code>standardize_data()</code></td>
+</tr>
+<tr class="even">
+<td><strong>API Service</strong></td>
+<td>RESTful endpoints for frontend</td>
+<td><code>get_dashboard_data()</code>, <code>get_trending_artists()</code>, <code>search_artists()</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Report Generator</strong></td>
+<td>Create PDF reports</td>
+<td><code>generate_wrapped_report()</code>, <code>create_custom_report()</code></td>
+</tr>
+<tr class="even">
+<td><strong>Email Service</strong></td>
+<td>Send reports via email</td>
+<td><code>send_report_email()</code>, <code>schedule_delivery()</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Auth Service</strong></td>
+<td>API authentication</td>
+<td><code>require_api_key()</code>, <code>validate_token()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="frontend-components" class="level3">
+<h3 class="anchored" data-anchor-id="frontend-components">Frontend Components</h3>
+<table class="table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 26%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Purpose</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Dashboard</strong></td>
+<td>Main analytics view</td>
+<td>Metrics cards, trending artists, real-time data</td>
+</tr>
+<tr class="even">
+<td><strong>Platform Analysis</strong></td>
+<td>Platform performance</td>
+<td>Market share charts, platform comparison</td>
+</tr>
+<tr class="odd">
+<td><strong>Report Builder</strong></td>
+<td>Generate custom reports</td>
+<td>Artist selection, template choice, PDF generation</td>
+</tr>
+<tr class="even">
+<td><strong>Artist Directory</strong></td>
+<td>Browse all artists</td>
+<td>Search, filtering, pagination</td>
+</tr>
+<tr class="odd">
+<td><strong>Artist Profile</strong></td>
+<td>Individual artist analytics</td>
+<td>Detailed metrics, track performance, growth trends</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="utility-functions" class="level3">
+<h3 class="anchored" data-anchor-id="utility-functions">Utility Functions</h3>
+<table class="table">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 31%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Utility</th>
+<th>Purpose</th>
+<th>Functions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>File Handlers</strong></td>
+<td>Process various file formats</td>
+<td><code>read_csv()</code>, <code>read_excel()</code>, <code>detect_encoding()</code></td>
+</tr>
+<tr class="even">
+<td><strong>Data Validators</strong></td>
+<td>Ensure data quality</td>
+<td><code>validate_isrc()</code>, <code>clean_artist_name()</code>, <code>standardize_country()</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Platform Mappers</strong></td>
+<td>Standardize platform data</td>
+<td><code>map_platform_id()</code>, <code>detect_platform_from_path()</code></td>
+</tr>
+<tr class="even">
+<td><strong>Formatters</strong></td>
+<td>Display formatting</td>
+<td><code>format_number()</code>, <code>format_date()</code>, <code>calculate_percentage()</code></td>
+</tr>
+</tbody>
+</table>
+<p>This modular architecture ensures scalability, maintainability, and clear separation of concerns while providing a comprehensive music analytics platform with professional reporting capabilities.</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

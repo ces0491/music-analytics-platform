@@ -1,0 +1,532 @@
+# 🏗️ Music Analytics Platform - System Architecture
+
+## 📊 Complete System Architecture
+
+```mermaid
+graph TB
+    subgraph "External Data Sources"
+        A1[Spotify Data Files]
+        A2[Apple Music Files]
+        A3[YouTube Analytics]
+        A4[Social Media APIs]
+        A5[Metadata Files]
+    end
+    
+    subgraph "Data Ingestion Layer"
+        B1[File Handler Service]
+        B2[Platform Mapper]
+        B3[Data Validator]
+        B4[Data Processor Service]
+    end
+    
+    subgraph "Data Storage Layer"
+        C1[(SQLite Database)]
+        C2[File System Storage]
+        C3[Generated Reports]
+    end
+    
+    subgraph "API Layer"
+        D1[Authentication Service]
+        D2[Dashboard API]
+        D3[Analytics API]
+        D4[Report Generator API]
+        D5[Artist API]
+    end
+    
+    subgraph "Frontend Layer"
+        E1[React Dashboard]
+        E2[Analytics Views]
+        E3[Report Builder]
+        E4[Artist Portal]
+    end
+    
+    subgraph "Report Generation"
+        F1[HTML Templates]
+        F2[PDF Generator]
+        F3[Email Service]
+    end
+    
+    subgraph "Deployment"
+        G1[Docker Backend]
+        G2[Docker Frontend]
+        G3[Nginx Proxy]
+    end
+    
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    A4 --> B1
+    A5 --> B1
+    
+    B1 --> B2
+    B2 --> B3
+    B3 --> B4
+    
+    B4 --> C1
+    B4 --> C2
+    
+    C1 --> D2
+    C1 --> D3
+    C1 --> D4
+    C1 --> D5
+    
+    D1 --> D2
+    D1 --> D3
+    D1 --> D4
+    D1 --> D5
+    
+    D2 --> E1
+    D3 --> E2
+    D4 --> E3
+    D5 --> E4
+    
+    D4 --> F1
+    F1 --> F2
+    F2 --> F3
+    F2 --> C3
+    
+    E1 --> G2
+    D2 --> G1
+    G1 --> G3
+    G2 --> G3
+```
+
+## 🔄 Data Processing Flow
+
+```mermaid
+flowchart TD
+    A[Raw Music Data Upload] --> B{File Type Detection}
+    
+    B -->|CSV/Excel| C[Read File with Pandas]
+    B -->|Unknown Format| D[Format Error]
+    
+    C --> E{Platform Detection}
+    
+    E -->|Spotify| F[Spotify Data Processor]
+    E -->|Apple Music| G[Apple Music Processor]
+    E -->|YouTube| H[YouTube Data Processor]
+    E -->|Metadata| I[Metadata Processor]
+    E -->|Unknown| J[Generic Processor]
+    
+    F --> K[Data Validation & Cleaning]
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+    
+    K --> L{Data Quality Check}
+    L -->|Pass| M[Database Schema Mapping]
+    L -->|Fail| N[Validation Error Log]
+    
+    M --> O[Insert to Database]
+    O --> P[Update Processing Stats]
+    P --> Q[Success Response]
+    
+    N --> R[Error Response]
+    D --> R
+```
+
+## 📈 Report Generation Workflow
+
+```mermaid
+sequenceDiagram
+    participant U as User/Frontend
+    participant API as Report API
+    participant DB as Database
+    participant T as Template Engine
+    participant PDF as PDF Generator
+    participant E as Email Service
+    
+    U->>API: Request Wrapped Report
+    Note over U,API: POST /reports/generate/wrapped
+    
+    API->>DB: Query Artist Data
+    DB-->>API: Return Aggregated Data
+    
+    API->>API: Calculate Insights & Metrics
+    
+    API->>T: Render HTML Template
+    T-->>API: Generated HTML
+    
+    API->>PDF: Convert HTML to PDF
+    PDF-->>API: PDF File Path
+    
+    alt Email Requested
+        API->>E: Send Email with PDF
+        E-->>API: Email Sent Confirmation
+    end
+    
+    API-->>U: Return Report Details
+    Note over U,API: {pdf_path, artist_name, summary}
+```
+
+## 🎯 Frontend Component Flow
+
+```mermaid
+graph TD
+    A[App.jsx - Main Router] --> B[Header Component]
+    A --> C[Sidebar Component]
+    A --> D[Main Content Area]
+    
+    D --> E{Current Route}
+    
+    E -->|/dashboard| F[Dashboard Overview]
+    E -->|/analytics| G[Platform Analysis]
+    E -->|/reports| H[Report Builder]
+    E -->|/artists| I[Artist Directory]
+    
+    F --> F1[useApi Hook]
+    F --> F2[Metrics Cards]
+    F --> F3[Trending Artists]
+    F --> F4[Charts & Visualizations]
+    
+    G --> G1[Platform Performance Table]
+    G --> G2[Market Share Charts]
+    G --> G3[Platform Comparison]
+    
+    H --> H1[Artist Selection]
+    H --> H2[Report Type Selection]
+    H --> H3[Generate Report Button]
+    H --> H4[Report Preview]
+    
+    I --> I1[Artist Search]
+    I --> I2[Artist Cards]
+    I --> I3[Artist Profile Links]
+    
+    F1 --> API[Backend API Calls]
+    G1 --> API
+    H3 --> API
+    I1 --> API
+```
+
+## 🔧 Backend Service Architecture
+
+```mermaid
+graph LR
+    subgraph "Flask Application Factory"
+        A[app.py - Main App]
+    end
+    
+    subgraph "Service Layer"
+        B[Data Processor Service]
+        C[API Service]
+        D[Report Generator Service]
+        E[Email Service]
+        F[Auth Service]
+    end
+    
+    subgraph "Model Layer"
+        G[Database Models]
+        H[Artist Model]
+        I[Track Model]
+        J[Metrics Model]
+    end
+    
+    subgraph "Utility Layer"
+        K[File Handlers]
+        L[Data Validators]
+        M[Platform Mappers]
+        N[Config Manager]
+    end
+    
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    A --> F
+    
+    B --> G
+    C --> G
+    D --> G
+    
+    B --> K
+    B --> L
+    B --> M
+    
+    C --> H
+    C --> I
+    C --> J
+    
+    D --> E
+```
+
+## 💾 Database Schema Relationships
+
+```mermaid
+erDiagram
+    dim_artists {
+        string artist_id PK
+        string artist_name
+        string artist_name_normalized
+        string source_platform
+        datetime created_at
+        boolean is_auto_generated
+    }
+    
+    dim_tracks {
+        string isrc PK
+        string track_name
+        string artist_id FK
+        string album_name
+        string label
+        integer duration_seconds
+        date release_date
+        string genre
+        datetime created_at
+    }
+    
+    dim_platforms {
+        string platform_id PK
+        string platform_name
+        string platform_category
+        string metric_type
+    }
+    
+    dim_countries {
+        string country_code PK
+        string country_name
+        string country_region
+    }
+    
+    dim_dates {
+        integer date_id PK
+        date full_date
+        integer year
+        integer month
+        string month_name
+        integer quarter
+    }
+    
+    fact_music_metrics {
+        integer metric_id PK
+        string isrc FK
+        string platform_id FK
+        string country_code FK
+        integer date_id FK
+        real metric_value
+        string metric_type
+        string product_type
+        string source_file
+        datetime processing_date
+        string environment
+    }
+    
+    processing_history {
+        integer processing_id PK
+        string file_path
+        string file_name
+        string platform_id
+        datetime processing_date
+        integer records_processed
+        integer records_inserted
+        integer file_size_bytes
+        string file_checksum
+        string processing_status
+        string error_message
+        real processing_duration_seconds
+    }
+    
+    apple_identifier_mapping {
+        string apple_identifier PK
+        string isrc
+        string track_name
+        string artist_name
+        real confidence_score
+        datetime created_at
+    }
+    
+    dim_artists ||--o{ dim_tracks : "has"
+    dim_tracks ||--o{ fact_music_metrics : "generates"
+    dim_platforms ||--o{ fact_music_metrics : "measures"
+    dim_countries ||--o{ fact_music_metrics : "located_in"
+    dim_dates ||--o{ fact_music_metrics : "occurs_on"
+```
+
+## 🎨 Frontend Component Hierarchy
+
+```mermaid
+graph TD
+    A[App] --> B[Header]
+    A --> C[Sidebar]
+    A --> D[Main Content]
+    
+    B --> B1[Logo]
+    B --> B2[Menu Toggle]
+    B --> B3[User Info]
+    
+    C --> C1[Navigation Items]
+    C --> C2[Active Route Highlighting]
+    
+    D --> E{Route Components}
+    
+    E --> F[DashboardOverview]
+    E --> G[PlatformAnalysis]
+    E --> H[ReportBuilder]
+    E --> I[ArtistDirectory]
+    E --> J[ArtistProfile]
+    
+    F --> F1[MetricsCard x4]
+    F --> F2[TrendingArtists Table]
+    
+    G --> G1[Platform Performance Table]
+    G --> G2[Market Share Chart]
+    
+    H --> H1[Artist Selector]
+    H --> H2[Report Type Selector]
+    H --> H3[Generate Button]
+    H --> H4[Report Preview]
+    
+    I --> I1[Search Bar]
+    I --> I2[Artist Grid]
+    I --> I3[Pagination]
+    
+    J --> J1[Artist Header]
+    J --> J2[Metrics Overview]
+    J --> J3[Track Performance]
+    J --> J4[Platform Breakdown]
+    
+    F1 --> F1A[useApi Hook]
+    F2 --> F2A[useApi Hook]
+    G1 --> G1A[useApi Hook]
+    H3 --> H3A[Report Generation API]
+```
+
+## 🔄 API Request/Response Flow
+
+```mermaid
+sequenceDiagram
+    participant F as Frontend
+    participant A as API Gateway
+    participant S as Service Layer
+    participant D as Database
+    participant C as Cache
+    
+    F->>A: GET /api/v1/dashboard/overview
+    A->>A: Check Authentication
+    A->>C: Check Cache
+    
+    alt Cache Hit
+        C-->>A: Return Cached Data
+        A-->>F: JSON Response
+    else Cache Miss
+        A->>S: Process Request
+        S->>D: Execute Queries
+        D-->>S: Return Data
+        S->>S: Process & Format Data
+        S-->>A: Processed Data
+        A->>C: Store in Cache
+        A-->>F: JSON Response
+    end
+    
+    Note over F,D: All API calls follow this pattern with caching and authentication
+```
+
+## 📱 User Interaction Flows
+
+### Dashboard Usage Flow
+```mermaid
+journey
+    title User Dashboard Experience
+    section Login
+      Open App: 5: User
+      View Dashboard: 5: User
+    section Explore Data
+      View Metrics Cards: 4: User
+      Check Trending Artists: 5: User
+      Navigate to Analytics: 4: User
+    section Generate Report
+      Go to Report Builder: 5: User
+      Select Artist: 4: User
+      Choose Report Type: 4: User
+      Generate PDF: 5: User
+      Download/Email Report: 5: User
+```
+
+### Report Generation Flow
+```mermaid
+stateDiagram-v2
+    [*] --> SelectArtist
+    SelectArtist --> SelectReportType
+    SelectReportType --> SetParameters
+    SetParameters --> PreviewData
+    PreviewData --> GenerateReport
+    GenerateReport --> Processing
+    Processing --> ReportReady
+    ReportReady --> EmailReport
+    ReportReady --> DownloadReport
+    EmailReport --> [*]
+    DownloadReport --> [*]
+    
+    Processing --> Error
+    Error --> SelectArtist
+```
+
+## 🚀 Deployment Architecture
+
+```mermaid
+graph TB
+    subgraph "Development Environment"
+        D1[Local Development]
+        D2[Hot Reloading]
+        D3[Debug Mode]
+    end
+    
+    subgraph "Docker Containers"
+        C1[Backend Container]
+        C2[Frontend Container]
+        C3[Database Volume]
+        C4[Nginx Proxy]
+    end
+    
+    subgraph "Production Services"
+        P1[Load Balancer]
+        P2[SSL Termination]
+        P3[Monitoring]
+        P4[Log Aggregation]
+    end
+    
+    D1 --> C1
+    D1 --> C2
+    
+    C1 --> C3
+    C2 --> C4
+    C1 --> C4
+    
+    C4 --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+```
+
+## 🔍 Function Purpose Summary
+
+### Backend Services
+
+| Service | Purpose | Key Functions |
+|---------|---------|---------------|
+| **Data Processor** | Ingest and clean music data | `process_folder()`, `detect_platform()`, `standardize_data()` |
+| **API Service** | RESTful endpoints for frontend | `get_dashboard_data()`, `get_trending_artists()`, `search_artists()` |
+| **Report Generator** | Create PDF reports | `generate_wrapped_report()`, `create_custom_report()` |
+| **Email Service** | Send reports via email | `send_report_email()`, `schedule_delivery()` |
+| **Auth Service** | API authentication | `require_api_key()`, `validate_token()` |
+
+### Frontend Components
+
+| Component | Purpose | Key Features |
+|-----------|---------|--------------|
+| **Dashboard** | Main analytics view | Metrics cards, trending artists, real-time data |
+| **Platform Analysis** | Platform performance | Market share charts, platform comparison |
+| **Report Builder** | Generate custom reports | Artist selection, template choice, PDF generation |
+| **Artist Directory** | Browse all artists | Search, filtering, pagination |
+| **Artist Profile** | Individual artist analytics | Detailed metrics, track performance, growth trends |
+
+### Utility Functions
+
+| Utility | Purpose | Functions |
+|---------|---------|-----------|
+| **File Handlers** | Process various file formats | `read_csv()`, `read_excel()`, `detect_encoding()` |
+| **Data Validators** | Ensure data quality | `validate_isrc()`, `clean_artist_name()`, `standardize_country()` |
+| **Platform Mappers** | Standardize platform data | `map_platform_id()`, `detect_platform_from_path()` |
+| **Formatters** | Display formatting | `format_number()`, `format_date()`, `calculate_percentage()` |
+
+This modular architecture ensures scalability, maintainability, and clear separation of concerns while providing a comprehensive music analytics platform with professional reporting capabilities.

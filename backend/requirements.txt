@@ -1,0 +1,60 @@
+# Core Flask Dependencies
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-Caching==2.1.0
+Flask-Limiter==3.5.0
+Werkzeug==2.3.7
+
+# Database
+SQLAlchemy==2.0.21
+pandas==2.1.1
+
+# API & Authentication
+PyJWT==2.8.0
+python-dotenv==1.0.0
+
+# Data Processing
+numpy==1.25.2
+openpyxl==3.1.2
+xlrd==2.0.1
+
+# PDF Generation
+pdfkit==1.0.0
+jinja2==3.1.2
+WeasyPrint==60.1
+
+# Email Service
+smtplib
+email-validator==2.0.0
+
+# File Processing
+chardet==5.2.0
+python-magic==0.4.27
+
+# HTTP & Networking
+requests==2.31.0
+urllib3==2.0.4
+
+# Date/Time Handling
+python-dateutil==2.8.2
+
+# Utilities
+tqdm==4.66.1
+pyyaml==6.0.1
+click==8.1.7
+
+# Production Server
+gunicorn==21.2.0
+
+# Development & Testing
+pytest==7.4.2
+pytest-flask==1.2.0
+flake8==6.0.0
+black==23.9.1
+
+# Monitoring & Logging
+structlog==23.1.0
+
+# Security
+cryptography==41.0.4
+bcrypt==4.0.1
