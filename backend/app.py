@@ -1,7 +1,6 @@
 # backend/app.py
 from flask import Flask
 from flask_cors import CORS
-from flask_caching import Cache
 from services.api_service import api_bp
 from services.report_generator import reports_bp
 from utils.config import Config
@@ -16,7 +15,6 @@ def create_app():
     
     # Initialize extensions
     CORS(app, origins=['http://localhost:3000'])
-    cache = Cache(app)
     
     # Initialize database
     init_database()
